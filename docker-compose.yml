@@ -1,0 +1,22 @@
+# 涂层线扫复核台：静态页面发布 + 一次性验收服务
+#
+#   docker compose up -d --build        构建并在后台启动页面
+#   docker compose run --rm verify      运行一次性 Vitest 验收（退出码即结论）
+#   WEB_PORT=8080 docker compose up -d  覆盖宿主端口
+services:
+  web:
+    build:
+      context: .
+      target: web
+    image: coating-kth-web:latest
+    ports:
+      # 宿主端口可用环境变量 WEB_PORT 覆盖，容器内始终为 80
+      - "${WEB_PORT:-8080}:80"
+    restart: unless-stopped
+
+  # 一次性验收服务：跑完 Vitest 即退出，不监听端口、非常驻
+  verify:
+    build:
+      context: .
+      target: verify
+    image: coating-kth-verify:latest
